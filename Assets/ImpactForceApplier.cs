@@ -5,8 +5,8 @@ using UnityEngine.Events;
 public class ImpactForceApplier : MonoBehaviour
 {
     [Header("Force Settings")]
-    public float extraForce = 10f;          
-    public float speedThreshold = 1f;       
+    public float extraForce = 10f;
+    public float speedThreshold = 1f;
 
     [Header("ImpactEvent")]
     public UnityEvent onImpactForceApplied;
@@ -21,22 +21,33 @@ public class ImpactForceApplier : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         triggerCollider = GetComponent<Collider>();
 
+        // Automatically load settings from SettingsManager if available
+        if (SettingsManager.Instance != null && SettingsManager.Instance.ImpactSettings != null)
+        {
+            extraForce = SettingsManager.Instance.ImpactSettings.extraForce;
+            speedThreshold = SettingsManager.Instance.ImpactSettings.speedThreshold;
+        }
+        else
+        {
+            Debug.LogWarning("SettingsManager or ImpactSettings is not assigned.");
+        }
+
         if (rb == null)
         {
-            Debug.LogError(" Rigidbody not found!");
+            Debug.LogError("Rigidbody not found!");
         }
         else if (!rb.isKinematic)
         {
-            Debug.LogWarning(" Not Kinimatic Rigidbody.");
+            Debug.LogWarning("Rigidbody should be kinematic.");
         }
 
         if (triggerCollider == null)
         {
-            Debug.LogError("Collider not found !");
+            Debug.LogError("Collider not found!");
         }
         else if (!triggerCollider.isTrigger)
         {
-            Debug.LogWarning("Collider need to be Trigger!");
+            Debug.LogWarning("Collider should be set as Trigger!");
         }
 
         lastPosition = transform.position;
@@ -44,10 +55,8 @@ public class ImpactForceApplier : MonoBehaviour
 
     private void Update()
     {
-      
         currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
         lastPosition = transform.position;
-
 
         if (triggerCollider != null)
         {
@@ -70,8 +79,14 @@ public class ImpactForceApplier : MonoBehaviour
             if (speed >= speedThreshold)
             {
                 Vector3 impactDirection = currentVelocity.normalized;
-                
-                otherRb.AddForce(impactDirection * extraForce* currentVelocity.magnitude, ForceMode.Impulse);
+                otherRb.AddForce(impactDirection * extraForce * currentVelocity.magnitude, ForceMode.Impulse);
+
+                // Try to find BruiseController on the impacted object or its parents
+                BruiseController bruiseController = other.GetComponentInParent<BruiseController>();
+                if (bruiseController != null)
+                {
+                    bruiseController.SpawnBruise(other.ClosestPoint(transform.position));
+                }
 
                 onImpactForceApplied?.Invoke();
             }
