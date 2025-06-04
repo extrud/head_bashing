@@ -9,7 +9,7 @@ public class ImpactForceApplier : MonoBehaviour
     public float speedThreshold = 1f;       
 
     [Header("ImpactEvent")]
-    public UnityEvent onImpactForceApplied; // UnityEvent для вызова из редактора
+    public UnityEvent onImpactForceApplied;
 
     private Rigidbody rb;
     private Collider triggerCollider;
@@ -23,7 +23,7 @@ public class ImpactForceApplier : MonoBehaviour
 
         if (rb == null)
         {
-            Debug.LogError("На объекте должен быть Rigidbody!");
+            Debug.LogError(" Rigidbody not found!");
         }
         else if (!rb.isKinematic)
         {
