@@ -9,6 +9,12 @@ public class BruiseController : MonoBehaviour
     public float maxBruiseDistance = 0.2f; // Maximum distance from transform
     public Vector3 offset = Vector3.zero; // Offset from transform      
 
+    private void Start()
+    {
+        // Example: Get bruisePrefab from a SettingsManager singleton
+        bruisePrefab = SettingsManager.Instance.ImpactSettings.bruisePrefab;
+    }
+
     /// <summary>
     /// Spawns a bruise prefab at the given position and sets this object's transform as the parent.
     /// If the position is farther than maxBruiseDistance from this transform, it will be clamped.
@@ -32,7 +38,7 @@ public class BruiseController : MonoBehaviour
         GameObject bruise = Instantiate(bruisePrefab, position, Quaternion.identity, this.transform);
 
         // Multiply bruise size by a random multiplier from 0.5 to 2
-        float randomScale = Random.Range(0.5f, 2f);
+        float randomScale = Random.Range(0.5f, 1f);
         bruise.transform.localScale *= randomScale;
     }
 }
