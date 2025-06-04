@@ -58,7 +58,7 @@ public class ImpactForceApplier : MonoBehaviour
         currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
         lastPosition = transform.position;
 
-        if (triggerCollider != null)
+        /*if (triggerCollider != null)
         {
             bool shouldBeEnabled = currentVelocity.magnitude >= speedThreshold;
             if (triggerCollider.enabled != shouldBeEnabled)
@@ -66,6 +66,7 @@ public class ImpactForceApplier : MonoBehaviour
                 triggerCollider.enabled = shouldBeEnabled;
             }
         }
+        */
     }
 
     private void OnTriggerEnter(Collider other)
@@ -80,13 +81,23 @@ public class ImpactForceApplier : MonoBehaviour
             {
                 Vector3 impactDirection = currentVelocity.normalized;
                 otherRb.AddForce(impactDirection * extraForce * currentVelocity.magnitude, ForceMode.Impulse);
-
-                // Try to find BruiseController on the impacted object or its parents
-                BruiseController bruiseController = other.GetComponentInParent<BruiseController>();
-                if (bruiseController != null)
+                if (speed >= speedThreshold * 3)
                 {
-                    bruiseController.SpawnBruise(other.ClosestPoint(transform.position));
+                    // Try to find BruiseController on the impacted object or its parents
+                    BruiseController bruiseController = other.GetComponentInParent<BruiseController>();
+                    if (bruiseController != null)
+                    {
+                        bruiseController.SpawnBruise(other.ClosestPoint(transform.position));
+                    }
+
+                    // --- ProgressiveJointRelaxer logic ---
+                    ProgressiveJointRelaxer relaxer = other.GetComponentInParent<ProgressiveJointRelaxer>();
+                    if (relaxer != null)
+                    {
+                        relaxer.RelaxOneStep();
+                    }
                 }
+                // --- End ProgressiveJointRelaxer logic ---
 
                 onImpactForceApplied?.Invoke();
             }
